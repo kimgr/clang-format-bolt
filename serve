@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ ! -d env ]; then
+   virtualenv env
+   . env/bin/activate
+   pip install cherrypy
+   pip install PyYAML
+else
+   . env/bin/activate
+fi
+
+python server.py
