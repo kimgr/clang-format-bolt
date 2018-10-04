@@ -42,29 +42,42 @@ def find_pattern_on_path(pattern):
                 return fname
 
 
+def collect_clang_formats():
+    clang_formats = []
+    patterns = [r'clang-format$',
+                r'clang-format-\d$',
+                r'clang-format-\d.\d$']
+    for pattern in patterns:
+        found = find_pattern_on_path(pattern)
+        if found:
+            clang_formats.append(found)
+
+    return set(clang_formats)
+
+
 class ClangFormatBolt(object):
+    def __init__(self):
+        self.clang_formats = collect_clang_formats()
+
+    def check_executable(self, executable):
+        if not executable in self.clang_formats:
+            raise Exception("Invalid clang-format executable: %s" % executable)
+
     @cherrypy.expose
     def version(self, clang_format=None):
         clang_format = clang_format or 'clang-format'
+        self.check_executable(clang_format)
         return run(clang_format, None, '--version')
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def list_clang_formats(self):
-        clang_formats = []
-        patterns = [r'clang-format$',
-                    r'clang-format-\d$',
-                    r'clang-format-\d.\d$']
-        for pattern in patterns:
-            found = find_pattern_on_path(pattern)
-            if found:
-                clang_formats.append(found)
-
-        return sorted(clang_formats)
+        return sorted(self.clang_formats)
 
     @cherrypy.expose
     def format(self, source, style=None, clang_format=None):
         clang_format = clang_format or 'clang-format'
+        self.check_executable(clang_format)
 
         style = style or 'LLVM'
         if '\n' in style:
