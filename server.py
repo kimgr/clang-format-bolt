@@ -24,19 +24,28 @@ def yaml_to_dict(yml):
     return y
 
 
+def run(command, input=None, *args):
+    cmd = [command] + list(args)
+    p = subprocess.Popen(cmd,
+                         stdin=subprocess.PIPE if input else None,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    output, _ = p.communicate(input=input)
+    return output
+
+
 class ClangFormatBolt(object):
     @cherrypy.expose
-    def format(self, source, style=None):
+    @cherrypy.expose
+    def format(self, source, style=None, clang_format=None):
+        clang_format = clang_format or 'clang-format'
+
         style = style or 'LLVM'
         if '\n' in style:
-            style = yaml_to_dict(style)
+            style = yaml_to_json(style)
 
-        p = subprocess.Popen(['clang-format', '-style=' + style],
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
-        o, _ = p.communicate(input=source)
-        return "<pre>" + o + "</pre>"
+        output = run(clang_format, source, '-style=' + style)
+        return "<pre>%s</pre>" % output
 
 
 cherrypy.quickstart(ClangFormatBolt(), '/', CONF)
