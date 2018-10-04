@@ -44,6 +44,10 @@ def find_pattern_on_path(pattern):
 
 class ClangFormatBolt(object):
     @cherrypy.expose
+    def version(self, clang_format=None):
+        clang_format = clang_format or 'clang-format'
+        return run(clang_format, None, '--version')
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def list_clang_formats(self):
