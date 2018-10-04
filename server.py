@@ -16,7 +16,7 @@ CONF = {
 }
 
 
-def yaml_to_dict(yml):
+def yaml_to_json(yml):
     y = yaml.load(yml)
     y = str(y)
     y = y.replace("False", "false")
