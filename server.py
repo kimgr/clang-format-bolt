@@ -1,4 +1,5 @@
 import os
+import re
 import yaml
 import cherrypy
 import subprocess
@@ -34,8 +35,29 @@ def run(command, input=None, *args):
     return output
 
 
+def find_pattern_on_path(pattern):
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        for fname in os.listdir(path):
+            if re.match(pattern, fname):
+                return fname
+
+
 class ClangFormatBolt(object):
     @cherrypy.expose
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def list_clang_formats(self):
+        clang_formats = []
+        patterns = [r'clang-format$',
+                    r'clang-format-\d$',
+                    r'clang-format-\d.\d$']
+        for pattern in patterns:
+            found = find_pattern_on_path(pattern)
+            if found:
+                clang_formats.append(found)
+
+        return sorted(clang_formats)
+
     @cherrypy.expose
     def format(self, source, style=None, clang_format=None):
         clang_format = clang_format or 'clang-format'
