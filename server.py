@@ -9,7 +9,7 @@ CONF = {
     '/': {
         'tools.staticdir.on': True,
         'tools.staticdir.dir': os.getcwd(),
-        'tools.staticdir.index': 'index.html'
+        'tools.staticdir.index': 'golden.html'
     },
     'global': {
         'server.socket_host': '0.0.0.0'
@@ -71,7 +71,7 @@ class ClangFormatBolt(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def list_clang_formats(self):
+    def clang_formats(self):
         return sorted(self.clang_formats)
 
     @cherrypy.expose
@@ -84,7 +84,7 @@ class ClangFormatBolt(object):
             style = yaml_to_json(style)
 
         output = run(clang_format, source, '-style=' + style)
-        return "<pre>%s</pre>" % output
+        return output
 
 
 cherrypy.quickstart(ClangFormatBolt(), '/', CONF)

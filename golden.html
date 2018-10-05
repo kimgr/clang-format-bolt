@@ -1,0 +1,181 @@
+<html>
+  <head>
+    <title>format-bolt</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="//golden-layout.com/assets/js/goldenlayout.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
+    <style>
+      h1 {
+      font-family: sans-serif;
+      }
+      textarea.textin {
+      width: 95%;
+      height: 95%;
+      }
+      textarea.textout {
+      width: 95%;
+      height: 95%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="content" style="height:90%; width:98%;">
+      <h1>Clang-format-bolt</h1>
+      <script type="text/javascript">
+var layout = new GoldenLayout({
+settings:{
+        showPopoutIcon: false,
+        showCloseIcon: false,
+},
+content: [{
+            type: 'row',
+            content:[{
+                type: 'component',
+                componentName: 'Source',
+                componentState: {},
+                isClosable: false,
+            },{
+                type: 'component',
+                componentName: 'Style',
+                componentState: {},
+                isClosable: false,
+            },{
+                type: 'component',
+                componentName: 'Output',
+                componentState: {},
+                isClosable: false,
+            }]
+        }]
+}, $('#content'));
+
+// setup before functions
+function run_format() {
+  $.post("/format", {'source': $('#source').val(), 'style': $('#style').val()}, function(data) {
+    $('#output').val(data);
+  });
+}
+
+var typingTimer;                // timer identifier
+var doneTypingInterval = 1200;  // time in ms
+
+layout.registerComponent('Source', function(container, componentState) {
+textarea = $('<textarea id="source" class="textin"></textarea>');
+textarea.val(`
+struct X {
+	int a;
+	int b;
+	char c;
+};
+
+int main() {
+	struct X x1 = { 10, 20, 30 };
+	struct X x2 = {
+		.a = 10,
+		.b = 20
+	};
+	int x3[] = {
+		20, 30, 40
+	};
+
+	return x1.a + x2.b + x3[0];
+}
+`);
+
+// on keyup, start the countdown
+textarea.keyup(function(){
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(run_format, doneTypingInterval);
+});
+
+container.getElement().append(textarea);
+});
+
+layout.registerComponent('Style', function(container, componentState) {
+  textarea = $('<textarea id="style" class="textin"></textarea>');
+textarea.val(`
+---
+Language:        Cpp
+# BasedOnStyle:  LLVM
+AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 4
+AlignEscapedNewlinesLeft: false
+AlignTrailingComments: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AlwaysBreakAfterDefinitionReturnType: true
+AlwaysBreakTemplateDeclarations: false
+AlwaysBreakBeforeMultilineStrings: false
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializersBeforeComma: false
+BinPackParameters: true
+ColumnLimit:     0
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+DerivePointerAlignment: false
+ExperimentalAutoDetectBinPacking: false
+IndentCaseLabels: true
+IndentWrappedFunctionNames: false
+IndentFunctionDeclarationAfterType: false
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: true
+NamespaceIndentation: Inner
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+PenaltyBreakFirstLessLess: 120
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+PointerAlignment: Right
+SpacesBeforeTrailingComments: 2
+Cpp11BracedListStyle: true
+Standard:        Cpp11
+IndentWidth:     4
+TabWidth:        4
+UseTab:          ForIndentation
+BreakBeforeBraces: Linux
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles:  false
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpaceAfterCStyleCast: false
+SpacesInContainerLiterals: true
+SpaceBeforeAssignmentOperators: true
+ContinuationIndentWidth: 4
+CommentPragmas:  '^ IWYU pragma:'
+ForEachMacros:   [ PL_LRULIST_FOR_EACH ]
+SpaceBeforeParens: Always
+DisableFormat:   false
+...
+`);
+
+// on keyup, start the countdown
+textarea.keyup(function(){
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(run_format, doneTypingInterval);
+});
+
+container.getElement().append(textarea);
+});
+
+layout.registerComponent('Output', function(container, componentState) {
+  textarea = $('<textarea id="output" class="textout"></textarea>');
+  container.getElement().append(textarea);
+});
+
+layout.init();
+
+$(function() {
+run_format();
+});
+      </script>
+    </div>
+  </body>
+</html>
