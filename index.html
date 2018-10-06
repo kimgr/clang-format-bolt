@@ -10,24 +10,17 @@
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.40.2/codemirror.css" />
     <style>
-     h1 {
+     body {
          font-family: sans-serif;
-     }
-     textarea.textin {
-         width: 95%;
-         height: 95%;
-     }
-     textarea.textout {
-         width: 95%;
-         height: 95%;
      }
      div#clang-format-bolt-main {
          height:90%;
          width:98%;
      }
+     /* Force CodeMirror editors to fill the parent */
      div.cm-s-default {
-         width: 95%;
-         height: 95%;
+         width: 100%;
+         height: 100%;
      }
     </style>
 </head>
@@ -70,7 +63,7 @@
          }
 
          layout.registerComponent('Source', function(container, componentState) {
-             textarea = $('<textarea id="source" class="textin"></textarea>');
+             textarea = $('<textarea id="source"></textarea>');
              textarea.val(`
 struct X {
 	int a;
@@ -96,7 +89,7 @@ int main() {
          });
 
          layout.registerComponent('Style', function(container, componentState) {
-             textarea = $('<textarea id="style" class="textin"></textarea>');
+             textarea = $('<textarea id="style"></textarea>');
              textarea.val(`
 ---
 Language:        Cpp
@@ -163,7 +156,7 @@ DisableFormat:   false
          });
 
          layout.registerComponent('Output', function(container, componentState) {
-             textarea = $('<textarea id="output" class="textout" readonly></textarea>');
+             textarea = $('<textarea id="output" readonly></textarea>');
              container.getElement().append(textarea);
          });
 
