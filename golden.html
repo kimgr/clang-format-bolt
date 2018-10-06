@@ -6,21 +6,25 @@
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css" />
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
     <style>
-      h1 {
-          font-family: sans-serif;
-      }
-      textarea.textin {
-          width: 95%;
-          height: 95%;
-      }
-      textarea.textout {
-          width: 95%;
-          height: 95%;
-      }
+     h1 {
+         font-family: sans-serif;
+     }
+     textarea.textin {
+         width: 95%;
+         height: 95%;
+     }
+     textarea.textout {
+         width: 95%;
+         height: 95%;
+     }
+     div#clang-format-bolt-main {
+         height:90%;
+         width:98%;
+     }
     </style>
 </head>
 <body>
-    <div id="content" style="height:90%; width:98%;">
+    <div id="clang-format-bolt-main">
         <h1>Clang-format-bolt</h1>
         <script type="text/javascript">
          var config = {
@@ -47,7 +51,7 @@
                      isClosable: false,
                  }]
              }]};
-         var layout = new GoldenLayout(config, $('#content'));
+         var layout = new GoldenLayout(config, $('#clang-format-bolt-main'));
 
          function runFormat() {
              postdata = {
