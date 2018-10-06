@@ -74,10 +74,10 @@ def collect_clang_formats():
 
 class ClangFormatBolt(object):
     def __init__(self):
-        self.clang_formats = collect_clang_formats()
+        self.clang_format_executables = collect_clang_formats()
 
     def check_executable(self, executable):
-        if not executable in self.clang_formats:
+        if not executable in self.clang_format_executables:
             raise Exception("Invalid clang-format executable: %s" % executable)
 
     @cherrypy.expose
@@ -89,7 +89,7 @@ class ClangFormatBolt(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def clang_formats(self):
-        return sorted(self.clang_formats)
+        return sorted(self.clang_format_executables)
 
     @cherrypy.expose
     def format(self, source, style=None, clang_format=None):
