@@ -30,7 +30,7 @@ def yaml_to_json(yml):
 
 
 def build_style_arg(style):
-    """ Returns a list of a single --style=X argument or an empty list """
+    """ Returns a list of a single -style=X argument or an empty list """
     if not style:
         return []
 
