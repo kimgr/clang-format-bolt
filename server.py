@@ -25,6 +25,23 @@ def yaml_to_json(yml):
     return y
 
 
+def flatten_json(json):
+    return json.replace('\n', '')
+
+
+def build_style_arg(style):
+    """ Returns a list of a single --style=X argument or an empty list """
+    if not style:
+        return []
+
+    if '{' in style:
+        style = flatten_json(style)
+    elif '\n' in style:
+        style = yaml_to_json(style)
+
+    return ["-style=" + style]
+
+
 def run(command, input=None, *args):
     cmd = [command] + list(args)
     p = subprocess.Popen(cmd,
@@ -79,11 +96,9 @@ class ClangFormatBolt(object):
         clang_format = clang_format or 'clang-format'
         self.check_executable(clang_format)
 
-        style = style or 'LLVM'
-        if '\n' in style:
-            style = yaml_to_json(style)
+        style = build_style_arg(style)
+        output = run(clang_format, source, *style)
 
-        output = run(clang_format, source, '-style=' + style)
         return output
 
 
