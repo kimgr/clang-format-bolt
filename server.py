@@ -17,16 +17,16 @@ CONF = {
 }
 
 
+def flatten_json(json):
+    return json.replace('\n', '')
+
+
 def yaml_to_json(yml):
     y = yaml.load(yml)
     y = str(y)
     y = y.replace("False", "false")
     y = y.replace("True", "true")
-    return y
-
-
-def flatten_json(json):
-    return json.replace('\n', '')
+    return flatten_json(y)
 
 
 def build_style_arg(style):
