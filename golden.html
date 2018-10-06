@@ -1,5 +1,5 @@
 <html>
-  <head>
+<head>
     <title>format-bolt</title>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="//golden-layout.com/assets/js/goldenlayout.min.js"></script>
@@ -7,61 +7,68 @@
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
     <style>
       h1 {
-      font-family: sans-serif;
+          font-family: sans-serif;
       }
       textarea.textin {
-      width: 95%;
-      height: 95%;
+          width: 95%;
+          height: 95%;
       }
       textarea.textout {
-      width: 95%;
-      height: 95%;
+          width: 95%;
+          height: 95%;
       }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="content" style="height:90%; width:98%;">
-      <h1>Clang-format-bolt</h1>
-      <script type="text/javascript">
-var layout = new GoldenLayout({
-settings:{
-        showPopoutIcon: false,
-        showCloseIcon: false,
-},
-content: [{
-            type: 'row',
-            content:[{
-                type: 'component',
-                componentName: 'Source',
-                componentState: {},
-                isClosable: false,
-            },{
-                type: 'component',
-                componentName: 'Style',
-                componentState: {},
-                isClosable: false,
-            },{
-                type: 'component',
-                componentName: 'Output',
-                componentState: {},
-                isClosable: false,
-            }]
-        }]
-}, $('#content'));
+        <h1>Clang-format-bolt</h1>
+        <script type="text/javascript">
+         var config = {
+             settings:{
+                 showPopoutIcon: false,
+                 showCloseIcon: false,
+             },
+             content: [{
+                 type: 'row',
+                 content:[{
+                     type: 'component',
+                     componentName: 'Source',
+                     componentState: {},
+                     isClosable: false,
+                 },{
+                     type: 'component',
+                     componentName: 'Style',
+                     componentState: {},
+                     isClosable: false,
+                 },{
+                     type: 'component',
+                     componentName: 'Output',
+                     componentState: {},
+                     isClosable: false,
+                 }]
+             }]};
+         var layout = new GoldenLayout(config, $('#content'));
 
-// setup before functions
-function run_format() {
-  $.post("/format", {'source': $('#source').val(), 'style': $('#style').val()}, function(data) {
-    $('#output').val(data);
-  });
-}
+         function runFormat() {
+             postdata = {
+                 'source': $('#source').val(),
+                 'style': $('#style').val()
+             }
+             $.post("/format", postdata, function(data) {
+                 $('#output').val(data);
+             });
+         }
 
-var typingTimer;                // timer identifier
-var doneTypingInterval = 1200;  // time in ms
+         var debounceTimer = null;
+         var doneTypingIntervalMs = 500;
+         function debounce() {
+             clearTimeout(debounceTimer);
+             debounceTimer = setTimeout(runFormat, doneTypingIntervalMs);
+         }
 
-layout.registerComponent('Source', function(container, componentState) {
-textarea = $('<textarea id="source" class="textin"></textarea>');
-textarea.val(`
+         layout.registerComponent('Source', function(container, componentState) {
+             textarea = $('<textarea id="source" class="textin"></textarea>');
+             textarea.val(`
 struct X {
 	int a;
 	int b;
@@ -80,20 +87,15 @@ int main() {
 
 	return x1.a + x2.b + x3[0];
 }
-`);
+             `);
 
-// on keyup, start the countdown
-textarea.keyup(function(){
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(run_format, doneTypingInterval);
-});
+             textarea.keyup(debounce);
+             container.getElement().append(textarea);
+         });
 
-container.getElement().append(textarea);
-});
-
-layout.registerComponent('Style', function(container, componentState) {
-  textarea = $('<textarea id="style" class="textin"></textarea>');
-textarea.val(`
+         layout.registerComponent('Style', function(container, componentState) {
+             textarea = $('<textarea id="style" class="textin"></textarea>');
+             textarea.val(`
 ---
 Language:        Cpp
 # BasedOnStyle:  LLVM
@@ -154,28 +156,23 @@ ForEachMacros:   [ PL_LRULIST_FOR_EACH ]
 SpaceBeforeParens: Always
 DisableFormat:   false
 ...
-`);
+             `);
 
-// on keyup, start the countdown
-textarea.keyup(function(){
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(run_format, doneTypingInterval);
-});
+             textarea.keyup(debounce);
+             container.getElement().append(textarea);
+         });
 
-container.getElement().append(textarea);
-});
+         layout.registerComponent('Output', function(container, componentState) {
+             textarea = $('<textarea id="output" class="textout"></textarea>');
+             container.getElement().append(textarea);
+         });
 
-layout.registerComponent('Output', function(container, componentState) {
-  textarea = $('<textarea id="output" class="textout"></textarea>');
-  container.getElement().append(textarea);
-});
+         layout.init();
 
-layout.init();
-
-$(function() {
-run_format();
-});
-      </script>
+         $(function() {
+             runFormat();
+         });
+        </script>
     </div>
   </body>
 </html>
