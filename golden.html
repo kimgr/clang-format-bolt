@@ -3,8 +3,12 @@
     <title>clang-format-bolt</title>
     <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="//golden-layout.com/assets/js/goldenlayout.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.40.2/codemirror.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.40.2/mode/clike/clike.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.40.2/mode/yaml/yaml.js"></script>
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-base.css" />
     <link type="text/css" rel="stylesheet" href="//golden-layout.com/assets/css/goldenlayout-light-theme.css" />
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.40.2/codemirror.css" />
     <style>
      h1 {
          font-family: sans-serif;
@@ -20,6 +24,10 @@
      div#clang-format-bolt-main {
          height:90%;
          width:98%;
+     }
+     div.cm-s-default {
+         width: 95%;
+         height: 95%;
      }
     </style>
 </head>
@@ -53,21 +61,13 @@
              }]};
          var layout = new GoldenLayout(config, $('#clang-format-bolt-main'));
 
-         function runFormat() {
+         function runFormat(source, style, success) {
              postdata = {
-                 'source': $('#source').val(),
-                 'style': $('#style').val()
+                 'source': source,
+                 'style': style
              }
-             $.post("/format", postdata, function(data) {
-                 $('#output').val(data);
-             });
-         }
-
-         var debounceTimer = null;
-         var doneTypingIntervalMs = 500;
-         function debounce() {
-             clearTimeout(debounceTimer);
-             debounceTimer = setTimeout(runFormat, doneTypingIntervalMs);
+             console.log(postdata);
+             $.post("/format", postdata, success);
          }
 
          layout.registerComponent('Source', function(container, componentState) {
@@ -93,7 +93,6 @@ int main() {
 }
              `);
 
-             textarea.keyup(debounce);
              container.getElement().append(textarea);
          });
 
@@ -162,7 +161,6 @@ DisableFormat:   false
 ...
              `);
 
-             textarea.keyup(debounce);
              container.getElement().append(textarea);
          });
 
@@ -171,10 +169,39 @@ DisableFormat:   false
              container.getElement().append(textarea);
          });
 
-         layout.init();
-
+         // On-load wiring
          $(function() {
-             runFormat();
+             layout.init();
+
+             // Set up code formatting
+             source_editor = CodeMirror.fromTextArea(document.getElementById('source'),
+                                                     { mode: "text/x-csrc" });
+             style_editor = CodeMirror.fromTextArea(document.getElementById('style'),
+                                                    { mode: "text/yaml" });
+             output_editor = CodeMirror.fromTextArea(document.getElementById('output'),
+                                                     { mode: "text/x-csrc",
+                                                       readOnly: true });
+
+             function onChange() {
+                 runFormat(source_editor.getDoc().getValue(),
+                           style_editor.getDoc().getValue(),
+                           function(data) {
+                               output_editor.getDoc().setValue(data);
+                           });
+             }
+
+             source_editor.on("change", function(editor, change) {
+                 editor.save();
+                 onChange();
+             });
+
+             style_editor.on("change", function(editor, change) {
+                 editor.save();
+                 onChange();
+             });
+
+             // Run the initial format
+             onChange();
          });
         </script>
     </div>
