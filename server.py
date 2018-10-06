@@ -9,7 +9,7 @@ CONF = {
     '/': {
         'tools.staticdir.on': True,
         'tools.staticdir.dir': os.getcwd(),
-        'tools.staticdir.index': 'golden.html'
+        'tools.staticdir.index': 'index.html'
     },
     'global': {
         'server.socket_host': '0.0.0.0'
